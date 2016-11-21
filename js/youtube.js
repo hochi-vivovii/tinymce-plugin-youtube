@@ -39,11 +39,22 @@
      * @param iframe {bool} embed or iframe
      * @returns {string}
      */
-    function convertUrl(url) {
-        var id = youtubeId(url);
-        if (url && id) {
+    function convertUrl() {
+        var url = '';
+        var id = youtubeId($('#youtubeID').val());
+        var options = "?rel=0&showinfo=0&disablekb=1&autohide=0";
+        var start = $("#youtubeStart").val();
+        var end = $("#youtubeEnd").val();
+        // Youtube Autoplay
+        if (start) {
+            options += "&start=" + parseTime(start);
+        }
+        if (end) {
+            options += "&end=" + parseTime(end);
+        }
+        if (id) {
             //url = "https://www.youtube.com/" + (iframe ? "embed/" : "v/") + youtubeId(url);
-            url = "https://www.youtube.com/" + "embed/" + youtubeId(url);
+            url = "https://www.youtube.com/" + "embed/" + id + options;
         }
         return url;
     }
@@ -51,16 +62,13 @@
     /**
      * Format HTML
      * @param iframe {boolean}
-     * @param width {number}
-     * @param height {number}
      * @param data {string}
      * @returns {string}
      */
-    function dataToHtml(width, height, data) {
+    function dataToHtml(data) {
         var dim;
         if (data) {
-            dim = 'width="' + width + '" height="' + height + '"';
-            return '<iframe src="' + data + '" ' + dim + ' frameborder="0" allowfullscreen class="embed-responsive-item">&nbsp;</iframe>';
+            return '<div class="mceNonEditable" style="width:100%;height:0;position:relative;padding-bottom:56.25%"><iframe src="'+data+'" frameborder="0" webkit-playsinline class="embed-responsive-item" style="width:100%;height:100%;position:absolute;">&nbsp;</iframe></div>';
         }
     }
 
@@ -70,42 +78,19 @@
      */
     function insert() {
         var result,
-            options = "",
-            youtubeAutoplay = $("#youtubeAutoplay").is(":checked"),
-            youtubeREL = $("#youtubeREL").is(":checked"),
-            youtubeHD = $("#youtubeHD").is(":checked"),
-            width = $("#youtubeWidth").val(),
-            height = $("#youtubeHeight").val(),
-            newYouTubeUrl = convertUrl($('#youtubeID').val());
+        newYouTubeUrl = convertUrl();
 
-        //SELECT Include related videos
-        if (youtubeREL) {
-            options += "?rel=1";
-        }else{
-            options += "?rel=0";
-        }
-
-        //SELECT Watch in HD
-        if (youtubeHD) {
-            options += "&hd=1";
-        }else{
-            options += "&hd=0";
-        }
-        // Youtube Autoplay
-        if (youtubeAutoplay) {
-            options += "&autoplay=1";
-        }
         if (newYouTubeUrl) {
             // Insert the contents from the input into the document
             //result = dataToHtml(html5State, width, height, newYouTubeUrl + (html5State ? "" : options));
-            result = dataToHtml(width, height, newYouTubeUrl + options);
+            result = dataToHtml(newYouTubeUrl);
         }
         return result;
     }
 
     function preview() {
         $("#preview").html(
-            dataToHtml(750, 315, convertUrl($('#youtubeID').val()))
+            dataToHtml(convertUrl())
         );
     }
 
@@ -115,9 +100,40 @@
      */
     function updateTimer(ts) {
         clearTimeout(timer);
+        if(!validateTime()) {
+            $("#insert-btn").prop('disabled', true);
+            $("#preview").html('');
+            return;
+        }
+        $("#insert-btn").prop('disabled', false);
         timer = setTimeout(preview, ts || 1000);
     }
-
+    function validateTime(){
+        var start = parseTime($('#youtubeStart').val());
+        var end = parseTime($('#youtubeEnd').val());
+        return (
+            (start !== false) &&
+            (end !== false) &&
+            (
+                (end === 0) ||
+                end > start
+            )
+        );
+    }
+    function parseTime(t) {
+        if(!t)
+            return 0;
+        var a = t.split(':');
+        if(a.length != 3) return false;
+        var h = parseInt(a[0]);
+        var m = parseInt(a[1]);
+        var s = parseInt(a[2]);
+        return (
+            !isNaN(h) && !isNaN(m) && !isNaN(s) &&
+            h >= 0 && m >= 0 && s >= 0 &&
+            m < 60 && s < 60
+        )? h * 3600 + m * 60 + s : false;
+    }
     /**
      * Execute insert
      */
@@ -137,7 +153,12 @@
             $('#youtubeID').keypress(function () {
                 updateTimer();
             }).change(function () {
-                updateTimer(100);
+                updateTimer(500);
+            });
+            $('#youtubeStart, #youtubeEnd').keypress(function () {
+                updateTimer();
+            }).change(function () {
+                updateTimer(500);
             });
         }
     }
@@ -148,22 +169,21 @@
     $(function () {
         // Init templatewith mustach
         var data = {
-            youtubeurl: parent.tinymce.util.I18n.translate("Youtube URL"),
-            youtubeID: parent.tinymce.util.I18n.translate("Youtube ID"),
-            youtubeWidth: parent.tinymce.util.I18n.translate("width"),
-            youtubeHeight: parent.tinymce.util.I18n.translate("height"),
-            youtubeAutoplay: parent.tinymce.util.I18n.translate("autoplay"),
-            youtubeHD: parent.tinymce.util.I18n.translate("HD video"),
-            youtubeREL: parent.tinymce.util.I18n.translate("Related video"),
-            cancel: parent.tinymce.util.I18n.translate("cancel"),
-            Insert: parent.tinymce.util.I18n.translate("Insert")
+            youtubeurl: "Youtube URL",
+            youtubeID: "Youtube ID",
+            cancel: "cancel",
+            Insert: "Insert"
         };
 
         //Use jQuery's get method to retrieve the contents of our template file, then render the template.
         $.get("view/forms.html", function (template) {
-            $("#template-container").append(Mustache.render(template, data));
+            $("#template-container").append(template);
             runPreview();
-            $("#insert-btn").on("click", run);
+
+            $("#insert-btn").on("click", function(){
+                if(validateTime())
+                    run();
+            });
             $("#close-btn").on("click", function(){
                 parent.tinymce.activeEditor.windowManager.close();
             });

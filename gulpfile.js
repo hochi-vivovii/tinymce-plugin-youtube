@@ -92,7 +92,6 @@ gulp.task("dist", ["clean", "html", "css", "js", "plugin"], function () {
         .pipe(rename(function (path) {
             path.dirname = "youtube/" + path.dirname.replace(/^tmp\/*/, "");
         }))
-        .pipe(zip("youtube.zip"))
         .pipe(gulp.dest("dist/"))
 });
 
