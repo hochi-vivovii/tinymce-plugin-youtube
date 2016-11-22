@@ -176,17 +176,14 @@
         };
 
         //Use jQuery's get method to retrieve the contents of our template file, then render the template.
-        $.get("view/forms.html", function (template) {
-            $("#template-container").append(template);
-            runPreview();
+        runPreview();
 
-            $("#insert-btn").on("click", function(){
-                if(validateTime())
-                    run();
-            });
-            $("#close-btn").on("click", function(){
-                parent.tinymce.activeEditor.windowManager.close();
-            });
+        $("#insert-btn").on("click", function(){
+            if(validateTime())
+                run();
         });
-    });
+        $("#close-btn").on("click", function(){
+            parent.tinymce.activeEditor.windowManager.close();
+        });
+});
 }(jQuery));

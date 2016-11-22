@@ -20,7 +20,6 @@
  # -- END LICENSE BLOCK -----------------------------------
  */
 (function (tiny) {
-    tiny.PluginManager.requireLangPack("youtube");
     tiny.PluginManager.add("youtube", function (editor, url) {
         function showDialog() {
             editor.windowManager.open({

@@ -17,13 +17,13 @@ gulp.task("clean", function () {
 /**
  * concat and minimy js
  */
-gulp.task("js", function () {
-    return gulp
-        .src(["js/vendor/**/*", "!js/vendor/jquery.js", "js/*"])
-        .pipe(concat("main.js"))
-        .pipe(uglify({preserveComments: "some"}))
-        .pipe(gulp.dest("tmp/js/"));
-});
+// gulp.task("js", function () {
+//     return gulp
+//         .src(["js/vendor/**/*", "!js/vendor/jquery.js", "js/*"])
+//         .pipe(concat("main.js"))
+//         .pipe(uglify({preserveComments: "some"}))
+//         .pipe(gulp.dest("tmp/js/"));
+// });
 
 /**
  * generate plugin.min.js
@@ -39,13 +39,13 @@ gulp.task("plugin", function () {
 /**
  * Concat and minify CSS
  */
-gulp.task("css", function () {
-    return gulp
-        .src(["css/bootstrap.min.css", "css/bootstrap-theme.min.css", "css/youtube.css"])
-        .pipe(concat("styles.css"))
-        .pipe(minifyCss())
-        .pipe(gulp.dest("tmp/css/"));
-});
+// gulp.task("css", function () {
+//     return gulp
+//         .src(["css/bootstrap.min.css", "css/bootstrap-theme.min.css", "css/youtube.css"])
+//         .pipe(concat("styles.css"))
+//         .pipe(minifyCss())
+//         .pipe(gulp.dest("tmp/css/"));
+// });
 
 /**
  * html file: replace css and js by minified files
@@ -54,35 +54,35 @@ gulp.task("html", function () {
     return gulp
         .src("youtube.html")
         // remove css
-        .pipe(replace(/(\r\n|\n|\r)\s*<link href[^>]*>/ig, function () {
-            return "";
-        }))
-        .pipe(replace(/<\/title>(\r\n|\n|\r)/i, function (match) {
-            return match + '    <link href="./css/styles.css" rel="stylesheet">\r\n'
-        }))
-        // remove js
-        .pipe(replace(/(\r\n|\n|\r)\s*<script\ssrc="\.(.*)"><\/script>/ig, function (match, file) {
-            if (file.match("jquery.min.js")) {
-                return match; // don't modify this include
-            } else {
-                return "";
-            }
-        }))
-        // add concat js file
-        .pipe(replace("</head>", '  <script src="./js/main.js"></script>\r\n</head>'))
+        // .pipe(replace(/(\r\n|\n|\r)\s*<link href[^>]*>/ig, function () {
+        //     return "";
+        // }))
+        // .pipe(replace(/<\/title>(\r\n|\n|\r)/i, function (match) {
+        //     return match + '    <link href="./css/styles.css" rel="stylesheet">\r\n'
+        // }))
+        // // remove js
+        // .pipe(replace(/(\r\n|\n|\r)\s*<script\ssrc="\.(.*)"><\/script>/ig, function (match, file) {
+        //     if (file.match("jquery.min.js")) {
+        //         return match; // don't modify this include
+        //     } else {
+        //         return "";
+        //     }
+        // }))
+        // // add concat js file
+        // .pipe(replace("</head>", '  <script src="./js/main.js"></script>\r\n</head>'))
         .pipe(gulp.dest("tmp/"));
 });
 
 /**
  * Build distribuable package
  **/
-gulp.task("dist", ["clean", "html", "css", "js", "plugin"], function () {
+gulp.task("dist", ["clean", "html", "plugin"], function () {
     return gulp
         .src([
             "img/**/*",
-            "view/**/*",
-            "langs/**/*",
-            "js/main.js",
+            // "view/**/*",
+            // "langs/**/*",
+            // "js/main.js",
             "tmp/**/*",
             "js/vendor/jquery.js",
             "LICENCE",
