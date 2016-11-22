@@ -1,6 +1,8 @@
 Plugin youtube for TinyMCE 4
 ======================
 
+Pre-built on 22 Nov 2016
+
 Insert YouTube video (Google Format) with optionnals (HD, similar vidéos)
 
 
